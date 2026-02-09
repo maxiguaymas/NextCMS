@@ -49,7 +49,7 @@ nextcms/
 
 1.  **Clonar el repositorio:**
     ```bash
-    git clone https://github.com/tu-usuario/nextcms.git
+    git clone https://github.com/maxiguaymas/nextcms.git
     cd nextcms
     ```
 
@@ -92,7 +92,6 @@ El proyecto utiliza un **Middleware de Next.js** para interceptar las peticiones
 ## 📈 Roadmap
 
 - [ ] Implementación de búsqueda con Full-text search.
-- [ ] Soporte multi-idioma (i18n).
 - [ ] Sistema de comentarios con moderación.
 - [ ] Dashboard con analíticas en tiempo real.
 
