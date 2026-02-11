@@ -15,6 +15,7 @@ export default function LoginPage() {
   
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [error, setError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -99,14 +100,26 @@ export default function LoginPage() {
               ¿Olvidaste tu contraseña?
             </Link>
           </div>
-          <input 
-            required
-            className="flex w-full rounded-lg text-[#101518] dark:text-white focus:outline-0 focus:ring-2 focus:ring-[#028ce8]/50 border border-[#dae2e7] dark:border-slate-700 bg-white dark:bg-slate-800 h-12 px-4 text-base transition-all"
-            placeholder="••••••••" 
-            type="password" 
-            value={formData.password}
-            onChange={(e) => setFormData({...formData, password: e.target.value})}
-          />
+          <div className="relative group">
+            <input 
+              required
+              className="flex w-full rounded-lg text-[#101518] dark:text-white focus:outline-0 focus:ring-2 focus:ring-[#028ce8]/50 border border-[#dae2e7] dark:border-slate-700 bg-white dark:bg-slate-800 h-12 pl-4 pr-12 text-base transition-all"
+              placeholder="••••••••" 
+              type={showPassword ? "text" : "password"} 
+              value={formData.password}
+              onChange={(e) => setFormData({...formData, password: e.target.value})}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center size-8 rounded-md text-slate-400 hover:text-[#028ce8] hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors"
+              aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+            >
+              <span className="material-symbols-outlined text-[20px]">
+                {showPassword ? 'visibility_off' : 'visibility'}
+              </span>
+            </button>
+          </div>
         </div>
 
         <button 

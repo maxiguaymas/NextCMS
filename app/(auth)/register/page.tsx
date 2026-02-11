@@ -14,6 +14,8 @@ export default function RegisterPage() {
   });
   const [errors, setErrors] = useState<{ [key in keyof typeof formData]?: string } & { general?: string }>({});
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const router = useRouter();
 
   const validate = () => {
@@ -114,19 +116,35 @@ export default function RegisterPage() {
         </div>
 
         {/* Password Field */}
-        <div className="flex flex-col w-full">
+        <div className="flex flex-col w-full group">
           <p className="text-[#101518] dark:text-slate-200 text-sm font-medium leading-normal pb-2">Contraseña</p>
           <label className="flex flex-col w-full">
             <div className="relative">
               <input 
-                className={`flex w-full rounded-lg text-[#101518] dark:text-white focus:outline-0 focus:ring-2 focus:ring-[#028ce8]/50 border ${errors.password ? 'border-red-500' : 'border-[#dae2e7] dark:border-slate-700'} bg-white dark:bg-slate-800 h-12 placeholder:text-[#5e7a8d] px-4 text-base font-normal transition-all`}
+                className={`flex w-full rounded-lg text-[#101518] dark:text-white focus:outline-0 focus:ring-2 focus:ring-[#028ce8]/50 border ${(errors.password || (formData.password.length > 0 && formData.password.length < 6)) ? 'border-red-500' : 'border-[#dae2e7] dark:border-slate-700'} bg-white dark:bg-slate-800 h-12 placeholder:text-[#5e7a8d] pl-4 pr-12 text-base font-normal transition-all`}
                 placeholder="••••••••" 
-                type="password" 
+                type={showPassword ? "text" : "password"} 
                 value={formData.password}
                 onChange={(e) => { setFormData({...formData, password: e.target.value}); setErrors(prev => ({ ...prev, password: undefined })) }}
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center size-8 rounded-md text-slate-400 hover:text-[#028ce8] transition-colors"
+                aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+              >
+                <span className="material-symbols-outlined text-[20px]">
+                  {showPassword ? 'visibility_off' : 'visibility'}
+                </span>
+              </button>
             </div>
-            {errors.password && <p className="text-xs text-red-500 mt-1 ml-1">{errors.password}</p>}
+            {(errors.password || (formData.password.length > 0 && formData.password.length < 6)) && (
+              <p className="text-xs text-red-500 mt-1 ml-1">
+                {formData.password.length > 0 && formData.password.length < 6 
+                  ? "La contraseña debe tener al menos 6 caracteres." 
+                  : errors.password}
+              </p>
+            )}
           </label>
         </div>
 
@@ -136,14 +154,30 @@ export default function RegisterPage() {
           <label className="flex flex-col w-full">
             <div className="relative">
               <input 
-                className={`flex w-full rounded-lg text-[#101518] dark:text-white focus:outline-0 focus:ring-2 focus:ring-[#028ce8]/50 border ${errors.confirmPassword ? 'border-red-500' : 'border-[#dae2e7] dark:border-slate-700'} bg-white dark:bg-slate-800 h-12 placeholder:text-[#5e7a8d] px-4 text-base font-normal transition-all`}
+                className={`flex w-full rounded-lg text-[#101518] dark:text-white focus:outline-0 focus:ring-2 focus:ring-[#028ce8]/50 border ${(errors.confirmPassword || (formData.confirmPassword.length > 0 && formData.confirmPassword !== formData.password)) ? 'border-red-500' : 'border-[#dae2e7] dark:border-slate-700'} bg-white dark:bg-slate-800 h-12 placeholder:text-[#5e7a8d] pl-4 pr-12 text-base font-normal transition-all`}
                 placeholder="••••••••" 
-                type="password" 
+                type={showConfirmPassword ? "text" : "password"} 
                 value={formData.confirmPassword}
                 onChange={(e) => { setFormData({...formData, confirmPassword: e.target.value}); setErrors(prev => ({ ...prev, confirmPassword: undefined })) }}
               />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center size-8 rounded-md text-slate-400 hover:text-[#028ce8] transition-colors"
+                aria-label={showConfirmPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+              >
+                <span className="material-symbols-outlined text-[20px]">
+                  {showConfirmPassword ? 'visibility_off' : 'visibility'}
+                </span>
+              </button>
             </div>
-            {errors.confirmPassword && <p className="text-xs text-red-500 mt-1 ml-1">{errors.confirmPassword}</p>}
+            {(errors.confirmPassword || (formData.confirmPassword.length > 0 && formData.confirmPassword !== formData.password)) && (
+              <p className="text-xs text-red-500 mt-1 ml-1">
+                {formData.confirmPassword.length > 0 && formData.confirmPassword !== formData.password 
+                  ? "Las contraseñas no coinciden." 
+                  : errors.confirmPassword}
+              </p>
+            )}
           </label>
         </div>
 

@@ -30,16 +30,15 @@ export default function AuthLayout({
         
         {/* Support Info */}
         <div className="mt-8 text-center text-slate-500 dark:text-slate-400 text-sm">
-          <p>Protocolo de seguridad activado. ¿Necesitas ayuda? <Link className="text-[#028ce8] hover:underline" href="#">Contactar soporte</Link></p>
+          <p>Protocolo de seguridad activado. ¿Necesitas ayuda? <Link className="text-[#028ce8] hover:underline" href="/contact">Contactar soporte</Link></p>
         </div>
       </main>
 
       {/* Simple Footer */}
       <footer className="py-6 px-10 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-slate-400 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0f1b23]">
         <div className="flex gap-6">
-          <Link className="hover:text-[#028ce8]" href="#">Política de privacidad</Link>
-          <Link className="hover:text-[#028ce8]" href="#">Términos de servicio</Link>
-          <Link className="hover:text-[#028ce8]" href="#">Estado</Link>
+          <Link className="hover:text-[#028ce8]" href="/privacy">Política de privacidad</Link>
+          <Link className="hover:text-[#028ce8]" href="/terms">Términos de servicio</Link>
         </div>
         <div>
           © {new Date().getFullYear()} NextCMS. All rights reserved.
