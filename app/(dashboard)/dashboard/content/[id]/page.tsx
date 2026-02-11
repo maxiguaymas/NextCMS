@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { getPostById } from "../actions";
 import { notFound } from "next/navigation";
 import { getServerSession } from "next-auth";
@@ -17,13 +18,13 @@ export default async function PostDetailPage({ params }: { params: Promise<{ id:
 
   const post = result.data;
 
-  const statusMap: Record<string, { label: string, color: string }> = {
+  const statusMap = {
     'PUBLISHED': { label: 'Publicado', color: 'emerald' },
     'DRAFT': { label: 'Borrador', color: 'slate' },
     'ARCHIVED': { label: 'Archivado', color: 'amber' },
-  };
+  } as const;
 
-  const statusInfo = statusMap[post.status] || statusMap['DRAFT'];
+  const statusInfo = statusMap[post.status as keyof typeof statusMap] || statusMap['DRAFT'];
 
   const formatDate = (date: Date) => {
     return new Intl.DateTimeFormat('es-ES', {
@@ -65,8 +66,14 @@ export default async function PostDetailPage({ params }: { params: Promise<{ id:
         <div className="lg:col-span-2 space-y-6">
           <div className="bg-white dark:bg-[#16181c] border border-gray-200 dark:border-[#282d33] rounded-2xl overflow-hidden shadow-sm">
             {post.featuredImage && (
-              <div className="aspect-video w-full overflow-hidden border-b border-gray-100 dark:border-[#282d33]">
-                <img src={post.featuredImage} alt={post.title} className="w-full h-full object-cover" />
+              <div className="aspect-video w-full overflow-hidden border-b border-gray-100 dark:border-[#282d33] relative">
+                <Image 
+                  src={post.featuredImage} 
+                  alt={post.title} 
+                  fill 
+                  className="object-cover"
+                  priority
+                />
               </div>
             )}
             <div className="p-6 md:p-8 space-y-6">
@@ -110,7 +117,7 @@ export default async function PostDetailPage({ params }: { params: Promise<{ id:
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Autor</span>
                 <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 dark:bg-[#0f1115] border border-gray-100 dark:border-[#282d33]">
                   <div className="size-8 rounded-full bg-[#028ce8]/10 text-[#028ce8] text-xs font-bold flex items-center justify-center border border-[#028ce8]/20">
-                    {post.author.name.split(' ').map((n: any) => n[0]).join('')}
+                    {post.author.name.split(' ').map((n: string) => n[0]).join('').toUpperCase()}
                   </div>
                   <div className="min-w-0">
                     <p className="text-sm font-bold text-slate-700 dark:text-white truncate">{post.author.name}</p>
