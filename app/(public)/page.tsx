@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import NewsletterForm from "@/components/NewsletterForm";
+import Image from "next/image";
 
 export default async function HomePage() {
   const latestPosts = await prisma.post.findMany({
@@ -57,11 +58,13 @@ export default async function HomePage() {
             ) : latestPosts.map((post) => (
               <Link key={post.id} href={`/posts/${post.slug || post.id}`}>
                 <article className="bg-white dark:bg-slate-900 rounded-2xl border border-[#e2e8f0] dark:border-slate-800 overflow-hidden h-full flex flex-col group hover:border-[#068ce5]/40 hover:shadow-xl hover:shadow-[#068ce5]/5 transition-all">
-                  <div className="aspect-video w-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
-                    <img 
+                  <div className="aspect-video w-full bg-slate-100 dark:bg-slate-800 overflow-hidden relative">
+                    <Image 
                       alt={post.title} 
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-500" 
                       src={post.featuredImage || "https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=2426&auto=format&fit=crop"}
+                      unoptimized
                     />
                   </div>
                   <div className="p-6 flex flex-col flex-1">
@@ -77,8 +80,18 @@ export default async function HomePage() {
                     </p>
                     <div className="flex items-center justify-between mt-auto pt-6 border-t border-slate-50 dark:border-slate-800">
                       <div className="flex items-center gap-3">
-                        <div className="size-8 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden flex items-center justify-center text-[10px] font-bold text-[#068ce5]">
-                          {post.author?.image ? <img alt="Author" src={post.author.image}/> : post.author?.name?.charAt(0) || 'U'}
+                        <div className="size-8 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden flex items-center justify-center text-[10px] font-bold text-[#068ce5] relative">
+                          {post.author?.image ? (
+                            <Image 
+                              alt="Author" 
+                              src={post.author.image}
+                              fill
+                              className="object-cover"
+                              unoptimized
+                            />
+                          ) : (
+                            post.author?.name?.charAt(0) || 'U'
+                          )}
                         </div>
                         <div>
                           <p className="text-xs font-semibold text-[#0f172a] dark:text-white">{post.author?.name || "Anónimo"}</p>

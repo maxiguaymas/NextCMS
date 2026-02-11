@@ -2,14 +2,22 @@
 
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-import { useState, useEffect } from "react";
-import { getPosts, deletePost } from "./actions";
+import { useState, useEffect, useCallback } from "react";
+import { getPosts } from "./actions";
 
 export default function ContentListPage() {
   const { data: session } = useSession();
-  const role = (session?.user as any)?.role || "VIEWER";
+  const role = session?.user?.role || "VIEWER";
   
-  const [posts, setPosts] = useState<any[]>([]);
+  const [posts, setPosts] = useState<Array<{
+    id: string;
+    title: string;
+    slug: string;
+    status: string;
+    author: {
+      name: string;
+    }
+  }>>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
@@ -17,21 +25,21 @@ export default function ContentListPage() {
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [menuPosition, setMenuPosition] = useState<{ top: number; left: number } | null>(null);
 
-  const fetchPosts = async () => {
+  const fetchPosts = useCallback(async () => {
     setLoading(true);
     const result = await getPosts(search, statusFilter);
     if (result.success) {
       setPosts(result.data || []);
     }
     setLoading(false);
-  };
+  }, [search, statusFilter]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
       fetchPosts();
     }, 300);
     return () => clearTimeout(timer);
-  }, [search, statusFilter]);
+  }, [fetchPosts]);
 
   const statusMap: Record<string, { label: string, color: string }> = {
     'PUBLISHED': { label: 'Publicado', color: 'emerald' },
@@ -142,7 +150,7 @@ export default function ContentListPage() {
                 <td className="py-4 px-4">
                   <div className="flex items-center gap-2">
                     <div className="size-6 rounded-full bg-[#028ce8]/10 text-[#028ce8] text-[10px] font-bold flex items-center justify-center border border-[#028ce8]/20">
-                      {post.author?.name?.split(' ').map((n: any) => n[0]).join('') || '??'}
+                      {post.author?.name?.split(' ').map((n: string) => n[0]).join('') || '??'}
                     </div>
                     <span className="text-slate-700 dark:text-slate-300 text-sm font-medium">{post.author?.name || 'Anónimo'}</span>
                   </div>

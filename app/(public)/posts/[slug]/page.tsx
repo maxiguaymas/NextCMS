@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
 import ShareButton from "@/components/ShareButton";
+import Image from "next/image";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -63,9 +64,15 @@ export default async function PostDetailPage({ params }: Props) {
 
           <div className="flex items-center justify-between py-6 border-y border-slate-100 dark:border-white/10">
             <div className="flex items-center gap-4">
-              <div className="h-12 w-12 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-sm font-bold text-[#068ce5] overflow-hidden border border-gray-200 dark:border-white/20">
+              <div className="h-12 w-12 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-sm font-bold text-[#068ce5] overflow-hidden border border-gray-200 dark:border-white/20 relative">
                 {post.author?.image ? (
-                  <img alt={post.author.name || "Autor"} src={post.author.image} className="object-cover h-full w-full" />
+                  <Image 
+                    alt={post.author.name || "Autor"} 
+                    src={post.author.image} 
+                    fill
+                    className="object-cover"
+                    unoptimized
+                  />
                 ) : (
                   post.author?.name?.charAt(0) || 'U'
                 )}

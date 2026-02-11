@@ -2,14 +2,15 @@ import Link from "next/link";
 import { getPostById } from "../actions";
 import { notFound } from "next/navigation";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
+import Image from "next/image";
 
 export default async function PostDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = await params;
   const id = resolvedParams.id;
   const result = await getPostById(id);
   const session = await getServerSession(authOptions);
-  const role = (session?.user as any)?.role || "VIEWER";
+  const role = session?.user?.role || "VIEWER";
 
   if (!result.success || !result.data) {
     notFound();
@@ -23,7 +24,7 @@ export default async function PostDetailPage({ params }: { params: Promise<{ id:
     'ARCHIVED': { label: 'Archivado', color: 'amber' },
   };
 
-  const statusInfo = statusMap[post.status] || statusMap['DRAFT'];
+  const statusInfo = statusMap[post.status] || { label: 'Borrador', color: 'slate' };
 
   const formatDate = (date: Date) => {
     return new Intl.DateTimeFormat('es-ES', {
@@ -65,8 +66,15 @@ export default async function PostDetailPage({ params }: { params: Promise<{ id:
         <div className="lg:col-span-2 space-y-6">
           <div className="bg-white dark:bg-[#16181c] border border-gray-200 dark:border-[#282d33] rounded-2xl overflow-hidden shadow-sm">
             {post.featuredImage && (
-              <div className="aspect-video w-full overflow-hidden border-b border-gray-100 dark:border-[#282d33]">
-                <img src={post.featuredImage} alt={post.title} className="w-full h-full object-cover" />
+              <div className="aspect-video w-full overflow-hidden border-b border-gray-100 dark:border-[#282d33] relative">
+                <Image 
+                  src={post.featuredImage} 
+                  alt={post.title} 
+                  fill 
+                  className="object-cover" 
+                  priority
+                  unoptimized
+                />
               </div>
             )}
             <div className="p-6 md:p-8 space-y-6">
@@ -88,7 +96,7 @@ export default async function PostDetailPage({ params }: { params: Promise<{ id:
 
               {post.excerpt && (
                 <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#0f1115] border border-gray-100 dark:border-[#282d33]">
-                  <p className="text-sm text-slate-600 dark:text-slate-400 italic">"{post.excerpt}"</p>
+                  <p className="text-sm text-slate-600 dark:text-slate-400 italic">&quot;{post.excerpt}&quot;</p>
                 </div>
               )}
 
@@ -110,7 +118,7 @@ export default async function PostDetailPage({ params }: { params: Promise<{ id:
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Autor</span>
                 <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 dark:bg-[#0f1115] border border-gray-100 dark:border-[#282d33]">
                   <div className="size-8 rounded-full bg-[#028ce8]/10 text-[#028ce8] text-xs font-bold flex items-center justify-center border border-[#028ce8]/20">
-                    {post.author.name.split(' ').map((n: any) => n[0]).join('')}
+                    {post.author.name.split(' ').map((n: string) => n[0]).join('')}
                   </div>
                   <div className="min-w-0">
                     <p className="text-sm font-bold text-slate-700 dark:text-white truncate">{post.author.name}</p>

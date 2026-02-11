@@ -3,9 +3,16 @@
 import React, { useState, useEffect, useRef } from "react";
 import { getUserProfile, updateProfile, updatePassword } from "./actions";
 import { useTheme } from "@/components/ThemeProvider";
+import Image from "next/image";
 
 export default function SettingsPage() {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<{
+    name: string;
+    email: string;
+    image?: string | null;
+    id?: string;
+    role?: string;
+  } | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setLoadingSaving] = useState(false);
   const [name, setName] = useState("");
@@ -43,7 +50,13 @@ export default function SettingsPage() {
     async function loadData() {
       const data = await getUserProfile();
       if (data) {
-        setUser(data);
+        setUser({
+          id: data.id,
+          name: data.name,
+          email: data.email,
+          image: data.image,
+          role: data.role
+        });
         setName(data.name);
         setImage(data.image || "");
       }
@@ -124,7 +137,14 @@ export default function SettingsPage() {
               <div className="relative group">
                 <div className="w-20 h-20 rounded-full bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 flex items-center justify-center text-xl font-bold text-[#028ce8] overflow-hidden">
                   {image ? (
-                    <img src={image} alt="Avatar" className="w-full h-full object-cover" />
+                    <Image 
+                      src={image} 
+                      alt="Avatar" 
+                      width={80} 
+                      height={80} 
+                      className="w-full h-full object-cover"
+                      unoptimized // Cloudinary/External images
+                    />
                   ) : (
                     name.charAt(0).toUpperCase()
                   )}

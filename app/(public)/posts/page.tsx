@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import Image from "next/image";
 
 export default async function PostsPage({
   searchParams,
@@ -117,8 +118,18 @@ export default async function PostsPage({
                 </div>
                 <div className="flex items-center justify-between mt-4">
                   <div className="flex items-center gap-3">
-                    <div className="h-8 w-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-[10px] font-bold text-[#068ce5] overflow-hidden">
-                      {post.author?.image ? <img alt="Author" src={post.author.image}/> : post.author?.name?.charAt(0) || 'U'}
+                    <div className="h-8 w-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-[10px] font-bold text-[#068ce5] overflow-hidden relative">
+                      {post.author?.image ? (
+                        <Image 
+                          alt="Author" 
+                          src={post.author.image}
+                          fill
+                          className="object-cover"
+                          unoptimized
+                        />
+                      ) : (
+                        post.author?.name?.charAt(0) || 'U'
+                      )}
                     </div>
                     <span className="text-[#111518] dark:text-white text-sm font-medium">{post.author?.name || "Anónimo"}</span>
                   </div>

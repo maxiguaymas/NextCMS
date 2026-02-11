@@ -22,7 +22,7 @@ export default function TermsPage() {
         <section className="mb-10">
           <h2 className="text-xl font-bold mb-4">3. Descargo de responsabilidad</h2>
           <p className="text-slate-600 dark:text-slate-300 italic">
-            Los materiales en NextCMS se proporcionan "tal cual". NextCMS no ofrece garantías, expresas o implícitas, y por la presente renuncia y niega todas las demás garantías, incluyendo, sin limitación, las garantías implícitas o condiciones de comerciabilidad.
+            Los materiales en NextCMS se proporcionan &quot;tal cual&quot;. NextCMS no ofrece garantías, expresas o implícitas, y por la presente renuncia y niega todas las demás garantías, incluyendo, sin limitación, las garantías implícitas o condiciones de comerciabilidad.
           </p>
         </section>
 

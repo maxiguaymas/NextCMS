@@ -7,10 +7,23 @@ import { createPost } from "./actions";
 import { updatePost } from "../actions";
 import { useRouter } from "next/navigation";
 
-export default function PostForm({ initialData }: { initialData?: any }) {
+interface PostInitialData {
+  id: string;
+  title: string;
+  slug: string;
+  status: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
+  featuredImage?: string | null;
+  content: string;
+  excerpt?: string | null;
+  metaTitle?: string | null;
+  metaDescription?: string | null;
+  author?: { name: string; email: string };
+}
+
+export default function PostForm({ initialData }: { initialData?: PostInitialData }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [status, setStatus] = useState<'DRAFT' | 'PUBLISHED'>(initialData?.status || 'DRAFT');
+  const [status, setStatus] = useState<'DRAFT' | 'PUBLISHED' | 'ARCHIVED'>(initialData?.status || 'DRAFT');
   const [title, setTitle] = useState(initialData?.title || "");
   const [slug, setSlug] = useState(initialData?.slug || "");
   const [isManualSlug, setIsManualSlug] = useState(!!initialData);
@@ -122,11 +135,12 @@ export default function PostForm({ initialData }: { initialData?: any }) {
               <span className="text-xs font-medium text-slate-500">Estado</span>
               <select 
                 value={status} 
-                onChange={(e) => setStatus(e.target.value as any)}
+                onChange={(e) => setStatus(e.target.value as 'DRAFT' | 'PUBLISHED' | 'ARCHIVED')}
                 className="bg-transparent text-[10px] font-bold uppercase focus:outline-none text-[#028ce8] cursor-pointer"
               >
                 <option value="DRAFT">Borrador</option>
                 <option value="PUBLISHED">Publicado</option>
+                <option value="ARCHIVED">Archivado</option>
               </select>
             </div>
 
@@ -178,6 +192,16 @@ export default function PostForm({ initialData }: { initialData?: any }) {
                 onChange={(e) => setMetaTitle(e.target.value)}
                 placeholder="Título para Google..."
                 className="w-full bg-slate-50 dark:bg-[#0f1115] border border-gray-100 dark:border-[#282d33] rounded-xl p-3 text-xs text-slate-600 dark:text-slate-300 focus:outline-none focus:ring-1 focus:ring-[#028ce8] transition-all"
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Meta Descripción</label>
+              <textarea
+                rows={2}
+                value={metaDescription}
+                onChange={(e) => setMetaDescription(e.target.value)}
+                placeholder="Descripción para buscadores..."
+                className="w-full bg-slate-50 dark:bg-[#0f1115] border border-gray-100 dark:border-[#282d33] rounded-xl p-3 text-xs text-slate-600 dark:text-slate-300 focus:outline-none focus:ring-1 focus:ring-[#028ce8] transition-all resize-none"
               />
             </div>
           </div>

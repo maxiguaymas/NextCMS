@@ -1,11 +1,11 @@
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
-  const role = (session?.user as any)?.role || "VIEWER";
+  const role = session?.user?.role || "VIEWER";
 
   // Consultas dinámicas a la base de datos
   const [totalUsers, activeUsers, publishedPosts, draftPosts, recentPosts, recentUsers] = await Promise.all([

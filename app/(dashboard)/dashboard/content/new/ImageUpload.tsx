@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef } from "react";
+import Image from "next/image";
 
 interface ImageUploadProps {
   value: string;
@@ -49,7 +50,13 @@ export default function ImageUpload({ value, onChange }: ImageUploadProps) {
       
       {value ? (
         <div className="relative aspect-video rounded-xl overflow-hidden border border-gray-100 dark:border-[#282d33] group">
-          <img src={value} alt="Preview" className="w-full h-full object-cover" />
+          <Image 
+            src={value} 
+            alt="Preview" 
+            fill 
+            className="object-cover"
+            unoptimized
+          />
           <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
             <button type="button" onClick={() => fileInputRef.current?.click()} className="px-3 py-1.5 bg-white text-slate-900 text-[10px] font-bold rounded-lg hover:bg-slate-100 transition-colors">Cambiar</button>
             <button type="button" onClick={() => onChange("")} className="px-3 py-1.5 bg-red-500 text-white text-[10px] font-bold rounded-lg hover:bg-red-600 transition-colors">Eliminar</button>

@@ -1,9 +1,7 @@
 'use client';
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { signOut, useSession } from "next-auth/react";
-import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
+import { useState } from "react";
 import Sidebar from "./Sidebar";
 
 export default function DashboardLayout({
@@ -12,7 +10,7 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const { data: session } = useSession();
-  const role = (session?.user as any)?.role || "VIEWER";
+  const role = session?.user?.role || "VIEWER";
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (

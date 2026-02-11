@@ -23,7 +23,7 @@
     "cloudinary": "^2.9.0",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
-    "next": "16.1.2",
+    "next": "15.1.8",
     "next-auth": "^4.24.13",
     "nodemailer": "^7.0.13",
     "pg": "^8.17.1",
@@ -32,6 +32,7 @@
     "react-dom": "19.2.3"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.2.0",
     "@tailwindcss/postcss": "^4",
     "@types/bcrypt": "^6.0.0",
     "@types/node": "^20",
@@ -40,9 +41,9 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "16.1.2",
+    "eslint-config-next": "15.1.8",
     "tailwindcss": "^4",
     "tsx": "^4.21.0",
-    "typescript": "^5"
+    "typescript": "^5.7.3"
   }
 }

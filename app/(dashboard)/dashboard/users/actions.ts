@@ -3,7 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 
 export async function getUsers() {
   try {
@@ -27,7 +27,7 @@ export async function getUsers() {
 
 export async function updateUserStatus(id: string, active: boolean) {
   const session = await getServerSession(authOptions);
-  if (!session || (session.user as any).role !== 'ADMIN') {
+  if (!session || session.user.role !== 'ADMIN') {
     return { success: false, error: "No autorizado" };
   }
 
@@ -38,25 +38,25 @@ export async function updateUserStatus(id: string, active: boolean) {
     });
     revalidatePath("/dashboard/users");
     return { success: true };
-  } catch (error) {
+  } catch {
     return { success: false, error: `Error al ${active ? 'activar' : 'desactivar'} usuario` };
   }
 }
 
 export async function updateUserRole(id: string, role: string) {
   const session = await getServerSession(authOptions);
-  if (!session || (session.user as any).role !== 'ADMIN') {
+  if (!session || session.user.role !== 'ADMIN') {
     return { success: false, error: "No autorizado" };
   }
 
   try {
     await prisma.user.update({
       where: { id },
-      data: { role: role as any }
+      data: { role: role as "ADMIN" | "EDITOR" | "VIEWER" }
     });
     revalidatePath("/dashboard/users");
     return { success: true };
-  } catch (error) {
+  } catch {
     return { success: false, error: "Error al actualizar rol" };
   }
 }

@@ -1,13 +1,14 @@
 'use server';
 
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 
 export async function getPosts(query?: string, status?: string) {
   try {
-    const where: any = {};
+    const where: Prisma.PostWhereInput = {};
 
     if (query) {
       where.OR = [
@@ -17,7 +18,7 @@ export async function getPosts(query?: string, status?: string) {
     }
 
     if (status && status !== 'ALL') {
-      where.status = status;
+      where.status = status as 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
     }
 
     const posts = await prisma.post.findMany({
@@ -100,7 +101,7 @@ export async function updatePost(id: string, data: {
     revalidatePath(`/dashboard/content/${id}`);
     
     return { success: true, id: post.id };
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error Prisma:", error);
     return { success: false, error: "Error al actualizar en la base de datos" };
   }
@@ -111,7 +112,7 @@ export async function deletePost(id: string) {
     await prisma.post.delete({ where: { id } });
     revalidatePath("/dashboard/content");
     return { success: true };
-  } catch (error) {
+  } catch {
     return { success: false, error: "Error al eliminar la publicación" };
   }
 }

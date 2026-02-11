@@ -2,7 +2,7 @@
 
 import { prisma } from "@/lib/prisma"; // Asegúrate de tener exportado prisma en lib/prisma.ts
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 
 export async function createPost(data: {
@@ -10,7 +10,7 @@ export async function createPost(data: {
   slug: string;
   content: string;
   featuredImage?: string;
-  status: 'DRAFT' | 'PUBLISHED';
+  status: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
   excerpt?: string;
   metaTitle?: string;
   metaDescription?: string;
@@ -40,7 +40,7 @@ export async function createPost(data: {
     revalidatePath("/dashboard/content");
     
     return { success: true, id: post.id };
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error Prisma:", error);
     return { success: false, error: "Error al guardar en la base de datos" };
   }

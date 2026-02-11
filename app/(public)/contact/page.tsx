@@ -14,7 +14,7 @@ export default function ContactPage() {
     try {
       const result = await sendContactForm(formData);
       setStatus(result);
-    } catch (e) {
+    } catch {
       setStatus({ error: "Ocurrió un error inesperado. Inténtalo de nuevo." });
     } finally {
       setIsPending(false);

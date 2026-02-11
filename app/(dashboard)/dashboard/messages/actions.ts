@@ -8,7 +8,7 @@ export async function getUnreadMessagesCount() {
     return await prisma.contactMessage.count({
       where: { read: false }
     });
-  } catch (error) {
+  } catch {
     return 0;
   }
 }
@@ -21,7 +21,7 @@ export async function markAsRead(id: string) {
     });
     revalidatePath('/dashboard/messages');
     return { success: true };
-  } catch (error) {
+  } catch {
     return { success: false };
   }
 }

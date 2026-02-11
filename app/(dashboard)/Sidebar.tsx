@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
 import { useTheme } from "@/components/ThemeProvider";
+import Image from "next/image";
 import { getUnreadMessagesCount } from "./dashboard/messages/actions";
 
 type Role = "ADMIN" | "EDITOR" | "VIEWER";
@@ -52,7 +53,7 @@ export default function Sidebar({ role, isOpen, onClose }: SidebarProps) {
   // Cerrar sidebar al cambiar de ruta en móvil
   useEffect(() => {
     onClose();
-  }, [pathname]);
+  }, [pathname, onClose]);
 
   // Cargar contador de mensajes sin leer
   useEffect(() => {
@@ -171,7 +172,14 @@ export default function Sidebar({ role, isOpen, onClose }: SidebarProps) {
           <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-white/5 cursor-pointer transition-colors group">
             <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 border border-gray-200 dark:border-[#282d33] overflow-hidden flex items-center justify-center text-[#028ce8] text-xs font-bold">
               {user?.image ? (
-                <img src={user.image} alt={user.name || "Avatar"} className="w-full h-full object-cover" />
+                <Image 
+                  src={user.image} 
+                  alt={user.name || "Avatar"} 
+                  width={32} 
+                  height={32} 
+                  className="w-full h-full object-cover"
+                  unoptimized
+                />
               ) : (
                 getInitials(user?.name)
               )}

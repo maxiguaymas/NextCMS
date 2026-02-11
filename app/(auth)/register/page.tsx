@@ -57,7 +57,7 @@ export default function RegisterPage() {
       } else {
         setErrors({ general: result.error || "Error al registrar el usuario." });
       }
-    } catch (err) {
+    } catch {
       setErrors({ general: "Ocurrió un error inesperado." });
     } finally {
       setLoading(false);

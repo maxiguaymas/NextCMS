@@ -1,6 +1,7 @@
 'use server';
 
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 import { sendNewsletterConfirmation } from "@/lib/mail";
 
 export async function subscribeToNewsletter(formData: FormData) {
@@ -21,8 +22,8 @@ export async function subscribeToNewsletter(formData: FormData) {
       .catch(err => console.error("Error enviando email:", err));
 
     return { success: true };
-  } catch (error: any) {
-    if (error.code === 'P2002') {
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
       return { error: "Este correo ya está suscrito a nuestro boletín." };
     }
     return { error: "Ocurrió un error. Inténtalo de nuevo más tarde." };

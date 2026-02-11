@@ -4,11 +4,19 @@ import React, { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { getUsers, updateUserStatus, updateUserRole } from "./actions";
 
+interface UserData {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  active: boolean;
+}
+
 export default function UsersPage() {
   const { data: session } = useSession();
-  const currentUserRole = (session?.user as any)?.role || "VIEWER";
+  const currentUserRole = session?.user?.role || "VIEWER";
   
-  const [users, setUsers] = useState<any[]>([]);
+  const [users, setUsers] = useState<UserData[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("ALL");
@@ -16,7 +24,7 @@ export default function UsersPage() {
   const [showRoleDropdown, setShowRoleDropdown] = useState(false);
   const [showStatusDropdown, setShowStatusDropdown] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [selectedUser, setSelectedUser] = useState<UserData | null>(null);
   const [showRoleModal, setShowRoleModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
@@ -38,7 +46,7 @@ export default function UsersPage() {
 
   const handleToggleStatus = async () => {
     if (!selectedUser) return;
-    if (selectedUser.id === (session?.user as any)?.id) {
+    if (selectedUser.id === session?.user?.id) {
       alert("No puedes desactivarte a ti mismo.");
       setShowDeleteModal(false);
       return;
