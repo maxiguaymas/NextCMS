@@ -2,15 +2,27 @@
 
 import { prisma } from "@/lib/prisma";
 import { sendNewsletterConfirmation } from "@/lib/mail";
+import { checkRateLimit } from "@/lib/rateLimit";
+import { z } from "zod";
+
+const emailSchema = z.string().email("Email inválido").max(254, "El email es demasiado largo");
 
 export async function subscribeToNewsletter(formData: FormData) {
-  const email = formData.get('email') as string;
+  const rawEmail = formData.get('email') as string;
 
-  if (!email || !email.includes('@')) {
-    return { error: "Por favor, introduce un email válido." };
+  // Validar email
+  const result = emailSchema.safeParse(rawEmail);
+  if (!result.success) {
+    return { error: result.error.errors[0]?.message || "Email inválido" };
   }
 
+  const email = result.data;
+
   try {
+    // Rate limiting
+    const ip = '127.0.0.1'; // En producción, obtener de headers
+    await checkRateLimit(ip, 'newsletter');
+
     await prisma.newsletterSubscriber.create({
       data: { email }
     });
@@ -21,10 +33,15 @@ export async function subscribeToNewsletter(formData: FormData) {
       .catch(err => console.error("Error enviando email:", err));
 
     return { success: true };
-  } catch (error: any) {
-    if (error.code === 'P2002') {
+  } catch (error) {
+    if (error instanceof Error && 'code' in error && error.code === 'P2002') {
       return { error: "Este correo ya está suscrito a nuestro boletín." };
     }
+    
+    if (error instanceof Error && error.message.includes('Rate limit')) {
+      return { error: error.message };
+    }
+    
     return { error: "Ocurrió un error. Inténtalo de nuevo más tarde." };
   }
 }

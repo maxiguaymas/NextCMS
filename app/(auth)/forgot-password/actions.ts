@@ -2,14 +2,28 @@
 
 import { prisma } from "@/lib/prisma";
 import { sendPasswordResetEmail } from "@/lib/mail";
+import { checkRateLimit } from "@/lib/rateLimit";
 import { randomUUID } from "crypto";
+import { z } from "zod";
+
+const emailSchema = z.string().email("Email inválido");
 
 export async function requestPasswordReset(formData: FormData) {
-  const email = formData.get("email") as string;
+  const rawEmail = formData.get("email") as string;
 
-  if (!email) return { error: "El correo es obligatorio." };
+  // Validar email
+  const result = emailSchema.safeParse(rawEmail);
+  if (!result.success) {
+    return { error: result.error.errors[0]?.message || "Email inválido" };
+  }
+
+  const email = result.data;
 
   try {
+    // Rate limiting
+    const ip = '127.0.0.1'; // En producción, obtener de headers
+    await checkRateLimit(ip, 'email');
+
     const user = await prisma.user.findUnique({ where: { email } });
 
     // Si el usuario no existe, no lo decimos por seguridad.
@@ -36,6 +50,11 @@ export async function requestPasswordReset(formData: FormData) {
     return { success: true };
   } catch (error) {
     console.error("Reset request error:", error);
+    
+    if (error instanceof Error && error.message.includes('Rate limit')) {
+      return { error: error.message };
+    }
+    
     return { error: "Ocurrió un error. Inténtalo más tarde." };
   }
 }

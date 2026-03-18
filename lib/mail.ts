@@ -1,18 +1,71 @@
 import nodemailer from 'nodemailer';
+import { z } from 'zod';
 
-// Configuramos el transportador de Gmail
+// Validación de variables de entorno
+const envSchema = z.object({
+  GMAIL_USER: z.string().email("GMAIL_USER debe ser un email válido"),
+  GMAIL_APP_PASSWORD: z.string().min(1, "GMAIL_APP_PASSWORD es requerido"),
+  NEXTAUTH_URL: z.string().url("NEXTAUTH_URL debe ser una URL válida"),
+});
+
+const env = envSchema.parse({
+  GMAIL_USER: process.env.GMAIL_USER,
+  GMAIL_APP_PASSWORD: process.env.GMAIL_APP_PASSWORD,
+  NEXTAUTH_URL: process.env.NEXTAUTH_URL,
+});
+
+// Configuramos el transportador de Gmail con validación estricta
 const transporter = nodemailer.createTransport({
   service: 'gmail',
+  host: 'smtp.gmail.com',
+  port: 465,
+  secure: true,
   auth: {
-    user: process.env.GMAIL_USER,
-    pass: process.env.GMAIL_APP_PASSWORD,
+    user: env.GMAIL_USER,
+    pass: env.GMAIL_APP_PASSWORD,
+  },
+  tls: {
+    rejectUnauthorized: true,
   },
 });
+
+// Verificar conexión SMTP al iniciar
+transporter.verify((error) => {
+  if (error) {
+    console.error('❌ Error de conexión SMTP:', error);
+  } else {
+    console.log('✅ Conexión SMTP establecida correctamente');
+  }
+});
+
+// Función para sanitizar inputs y prevenir inyección de headers
+function sanitizeInput(input: string): string {
+  if (typeof input !== 'string') return '';
+  return input
+    .replace(/[\r\n]/g, ' ') // Remove newlines
+    .replace(/[<>]/g, '') // Remove angle brackets
+    .replace(/\x00/g, ''); // Remove null bytes
+}
+
+// Función para validar email
+function isValidEmail(email: unknown): boolean {
+  if (typeof email !== 'string') return false;
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email) && email.length < 254;
+}
 
 /**
  * Envía un correo de bienvenida profesional cuando un usuario se registra.
  */
 export async function sendWelcomeEmail(to: string, name: string) {
+  // Validar inputs
+  if (!isValidEmail(to)) {
+    throw new Error('Email inválido');
+  }
+  
+  const sanitizedName = sanitizeInput(name);
+  const sanitizedTo = sanitizeInput(to);
+
   const htmlContent = `
     <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background-color: #f8fafc; padding: 40px 20px;">
       <div style="background-color: #ffffff; border-radius: 24px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);">
@@ -21,11 +74,11 @@ export async function sendWelcomeEmail(to: string, name: string) {
           <h1 style="color: white; margin: 0; font-size: 28px; letter-spacing: -0.025em; font-weight: 800;">¡Bienvenido a NextCMS!</h1>
         </div>
         <div style="padding: 40px; color: #0f172a; line-height: 1.8;">
-          <p style="font-size: 20px; font-weight: 700; margin-top: 0; color: #0f172a;">Hola ${name},</p>
+          <p style="font-size: 20px; font-weight: 700; margin-top: 0; color: #0f172a;">Hola ${sanitizedName},</p>
           <p style="color: #475569; font-size: 16px;">Estamos emocionados de tenerte en la comunidad. NextCMS ha sido diseñado para ofrecerte la máxima velocidad y flexibilidad en la gestión de tus contenidos técnicos.</p>
           <p style="color: #475569; font-size: 16px;">Tu cuenta ha sido creada con éxito. Ahora puedes acceder a tu panel de control personalizado.</p>
           <div style="text-align: center; margin: 40px 0;">
-            <a href="${process.env.NEXTAUTH_URL}/login" style="background-color: #068ce5; color: white !important; padding: 16px 36px; border-radius: 14px; text-decoration: none; font-weight: 700; font-size: 15px; display: inline-block; box-shadow: 0 10px 15px -3px rgba(6, 140, 229, 0.3);">Acceder a mi Panel</a>
+            <a href="${env.NEXTAUTH_URL}/login" style="background-color: #068ce5; color: white !important; padding: 16px 36px; border-radius: 14px; text-decoration: none; font-weight: 700; font-size: 15px; display: inline-block; box-shadow: 0 10px 15px -3px rgba(6, 140, 229, 0.3);">Acceder a mi Panel</a>
           </div>
           <p style="font-size: 13px; color: #94a3b8; margin-bottom: 0; text-align: center;">¿Tienes preguntas? Responde a este correo y nuestro equipo técnico te ayudará.</p>
         </div>
@@ -37,8 +90,8 @@ export async function sendWelcomeEmail(to: string, name: string) {
   `;
 
   return transporter.sendMail({
-    from: `"NextCMS Team" <${process.env.GMAIL_USER}>`,
-    to,
+    from: `"NextCMS Team" <${env.GMAIL_USER}>`,
+    to: sanitizedTo,
     subject: '🚀 ¡Bienvenido a la comunidad de NextCMS!',
     html: htmlContent,
   });
@@ -48,11 +101,18 @@ export async function sendWelcomeEmail(to: string, name: string) {
  * Envía un correo para verificar la cuenta.
  */
 export async function sendVerificationEmail(to: string, token: string) {
-  const confirmLink = `${process.env.NEXTAUTH_URL}/api/verify?token=${token}`;
+  if (!isValidEmail(to)) {
+    throw new Error('Email inválido');
+  }
+  
+  const sanitizedTo = sanitizeInput(to);
+  const sanitizedToken = sanitizeInput(token);
+
+  const confirmLink = `${env.NEXTAUTH_URL}/api/verify?token=${sanitizedToken}`;
 
   return transporter.sendMail({
-    from: `"NextCMS Security" <${process.env.GMAIL_USER}>`,
-    to,
+    from: `"NextCMS Security" <${env.GMAIL_USER}>`,
+    to: sanitizedTo,
     subject: '🔐 Verifica tu cuenta de NextCMS',
     html: `
       <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 16px;">
@@ -72,11 +132,18 @@ export async function sendVerificationEmail(to: string, token: string) {
  * Envía un correo para restablecer la contraseña.
  */
 export async function sendPasswordResetEmail(to: string, token: string) {
-  const resetLink = `${process.env.NEXTAUTH_URL}/reset-password?token=${token}`;
+  if (!isValidEmail(to)) {
+    throw new Error('Email inválido');
+  }
+  
+  const sanitizedTo = sanitizeInput(to);
+  const sanitizedToken = sanitizeInput(token);
+
+  const resetLink = `${env.NEXTAUTH_URL}/reset-password?token=${sanitizedToken}`;
 
   return transporter.sendMail({
-    from: `"NextCMS Security" <${process.env.GMAIL_USER}>`,
-    to,
+    from: `"NextCMS Security" <${env.GMAIL_USER}>`,
+    to: sanitizedTo,
     subject: '🔑 Restablece tu contraseña de NextCMS',
     html: `
       <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px; background-color: #f8fafc;">
@@ -97,9 +164,15 @@ export async function sendPasswordResetEmail(to: string, token: string) {
  * Envía una confirmación de suscripción al boletín.
  */
 export async function sendNewsletterConfirmation(to: string) {
+  if (!isValidEmail(to)) {
+    throw new Error('Email inválido');
+  }
+  
+  const sanitizedTo = sanitizeInput(to);
+
   return transporter.sendMail({
-    from: `"NextCMS" <${process.env.GMAIL_USER}>`,
-    to,
+    from: `"NextCMS" <${env.GMAIL_USER}>`,
+    to: sanitizedTo,
     subject: '✅ Suscripción confirmada',
     html: `
       <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 20px auto; background-color: #f8fafc; padding: 40px 20px;">
@@ -125,22 +198,31 @@ export async function sendNewsletterConfirmation(to: string) {
  * Notifica al administrador sobre un nuevo mensaje de contacto.
  */
 export async function sendContactNotification(name: string, email: string, subject: string, message: string) {
+  if (!isValidEmail(email)) {
+    throw new Error('Email inválido');
+  }
+  
+  const sanitizedName = sanitizeInput(name);
+  const sanitizedEmail = sanitizeInput(email);
+  const sanitizedSubject = sanitizeInput(subject);
+  const sanitizedMessage = sanitizeInput(message);
+
   return transporter.sendMail({
-    from: `"NextCMS System" <${process.env.GMAIL_USER}>`,
-    to: process.env.GMAIL_USER, // Te lo envías a ti mismo
-    subject: `📩 Nuevo contacto: ${subject}`,
+    from: `"NextCMS System" <${env.GMAIL_USER}>`,
+    to: env.GMAIL_USER, // Te lo envías a ti mismo
+    subject: `📩 Nuevo contacto: ${sanitizedSubject}`,
     html: `
       <div style="font-family: sans-serif; padding: 20px; color: #0f172a;">
         <h2 style="color: #068ce5;">Nuevo mensaje recibido</h2>
         <div style="background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0;">
-          <p><strong>De:</strong> ${name} (${email})</p>
-          <p><strong>Asunto:</strong> ${subject}</p>
+          <p><strong>De:</strong> ${sanitizedName} (${sanitizedEmail})</p>
+          <p><strong>Asunto:</strong> ${sanitizedSubject}</p>
           <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e2e8f0; white-space: pre-wrap;">
-            ${message}
+            ${sanitizedMessage}
           </div>
         </div>
         <div style="margin-top: 20px;">
-          <a href="${process.env.NEXTAUTH_URL}/dashboard/messages" style="color: #068ce5; font-weight: bold; text-decoration: none;">
+          <a href="${env.NEXTAUTH_URL}/dashboard/messages" style="color: #068ce5; font-weight: bold; text-decoration: none;">
             Ver en el Dashboard →
           </a>
         </div>

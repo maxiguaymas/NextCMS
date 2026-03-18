@@ -2,18 +2,40 @@
 
 import { prisma } from "@/lib/prisma";
 import { sendVerificationEmail } from "@/lib/mail";
+import { checkRateLimit } from "@/lib/rateLimit";
 import bcrypt from "bcryptjs";
+import { z } from "zod";
+
+// Schema de validación para registro
+const registerSchema = z.object({
+  name: z.string().min(2, "El nombre debe tener al menos 2 caracteres").max(100, "El nombre es demasiado largo"),
+  email: z.string().email("Email inválido").max(254, "El email es demasiado largo"),
+  password: z.string()
+    .min(8, "La contraseña debe tener al menos 8 caracteres")
+    .regex(/[A-Z]/, "La contraseña debe contener al menos una mayúscula")
+    .regex(/[a-z]/, "La contraseña debe contener al menos una minúscula")
+    .regex(/[0-9]/, "La contraseña debe contener al menos un número"),
+});
 
 export async function registerUser(formData: FormData) {
-  const name = formData.get('name') as string;
-  const email = formData.get('email') as string;
-  const password = formData.get('password') as string;
+  // Validar inputs
+  const result = registerSchema.safeParse({
+    name: formData.get('name') as string,
+    email: formData.get('email') as string,
+    password: formData.get('password') as string,
+  });
 
-  if (!name || !email || !password) {
-    return { error: "Todos los campos son obligatorios." };
+  if (!result.success) {
+    return { error: result.error.errors[0]?.message || "Datos inválidos" };
   }
 
+  const { name, email, password } = result.data;
+
   try {
+    // Rate limiting
+    const ip = '127.0.0.1'; // En producción, obtener de headers
+    await checkRateLimit(ip, 'email');
+
     // 1. Verificar si el usuario ya existe
     const existingUser = await prisma.user.findUnique({
       where: { email }
@@ -42,6 +64,11 @@ export async function registerUser(formData: FormData) {
     return { success: true };
   } catch (error) {
     console.error("Registration error:", error);
+    
+    if (error instanceof Error && error.message.includes('Rate limit')) {
+      return { error: error.message };
+    }
+    
     return { error: "Ocurrió un error al crear la cuenta. Inténtalo de nuevo." };
   }
 }
