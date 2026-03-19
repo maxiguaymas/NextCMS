@@ -2,156 +2,122 @@
 
 import { useState } from "react";
 import { sendContactForm } from "./actions";
+import Button from "@/components/ui/Button";
+import Input from "@/components/ui/Input";
+import Textarea from "@/components/ui/Textarea";
+import { useForm } from "@/hooks/useForm";
+import { contactSchema, ContactFormData } from "@/lib/schemas";
 
 export default function ContactPage() {
-  const [isPending, setIsPending] = useState(false);
   const [status, setStatus] = useState<{ success?: boolean; error?: string } | null>(null);
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    subject: "",
-    message: "",
+  
+  const { values, errors, isSubmitting, handleChange, onSubmit } = useForm<ContactFormData>({
+    schema: contactSchema,
+    defaultValues: { name: "", email: "", subject: "", message: "" },
   });
-  const [fieldError, setFieldError] = useState<string | null>(null);
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setFieldError(null);
-    setStatus(null);
+  const handleFormSubmit = async (data: ContactFormData) => {
+    const formData = new FormData();
+    formData.append("name", data.name);
+    formData.append("email", data.email);
+    formData.append("subject", data.subject);
+    formData.append("message", data.message);
 
-    if (!formData.name.trim() || !formData.email.trim() || !formData.subject.trim() || !formData.message.trim()) {
-      setFieldError("Por favor, completa todos los campos.");
-      return;
+    const result = await sendContactForm(formData);
+    if (result.success) {
+      setStatus({ success: true });
+    } else {
+      setStatus({ error: result.error || "Error al enviar el mensaje" });
     }
-
-    setIsPending(true);
-    
-    const formDataToSend = new FormData();
-    formDataToSend.append("name", formData.name);
-    formDataToSend.append("email", formData.email);
-    formDataToSend.append("subject", formData.subject);
-    formDataToSend.append("message", formData.message);
-    
-    try {
-      const result = await sendContactForm(formDataToSend);
-      setStatus(result);
-      if (result.success) {
-        setFormData({ name: "", email: "", subject: "", message: "" });
-      }
-    } catch {
-      setStatus({ error: "Ocurrió un error inesperado. Inténtalo de nuevo." });
-    } finally {
-      setIsPending(false);
-    }
-  }
+  };
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center px-6 py-12 bg-[#f8fafc] dark:bg-[#0f1b23]">
+    <div className="min-h-[80vh] flex items-center justify-center px-6 py-12 bg-[var(--background-subtle)]">
       <div className="w-full max-w-[550px]">
         <div className="text-center mb-10">
-          <h1 className="text-[#0f172a] dark:text-white text-3xl md:text-4xl font-black tracking-tight mb-3">
+          <h1 className="text-[var(--foreground)] text-3xl md:text-4xl font-black tracking-tight mb-3">
             Contacto
           </h1>
-          <p className="text-slate-500 dark:text-slate-400">
+          <p className="text-[var(--foreground-muted)]">
             ¿Tienes alguna duda? Envíanos un mensaje y te responderemos lo antes posible.
           </p>
         </div>
 
         {status?.success ? (
-          <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-8 text-center animate-in fade-in zoom-in duration-300">
-            <div className="size-16 bg-emerald-500 text-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-emerald-500/20">
+          <div className="bg-[var(--success-muted)] border border-[var(--success)]/20 rounded-[var(--radius-xl)] p-8 text-center animate-fade-in">
+            <div className="size-16 bg-[var(--success)] text-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
               <span className="material-symbols-outlined text-3xl">check</span>
             </div>
-            <h3 className="text-emerald-600 dark:text-emerald-400 font-bold text-xl mb-2">¡Mensaje enviado!</h3>
-            <p className="text-slate-600 dark:text-slate-400 text-sm">Gracias por contactarnos. Hemos recibido tu solicitud correctamente.</p>
-            <button 
-              onClick={() => {
-                setStatus(null);
-                setFormData({ name: "", email: "", subject: "", message: "" });
-              }}
-              className="mt-6 text-sm font-bold text-[#068ce5] hover:underline"
+            <h3 className="text-[var(--success)] font-bold text-xl mb-2">¡Mensaje enviado!</h3>
+            <p className="text-[var(--foreground-muted)] text-sm">
+              Gracias por contactarnos. Hemos recibido tu solicitud correctamente.
+            </p>
+            <button
+              onClick={() => setStatus(null)}
+              className="mt-6 text-sm font-bold text-[var(--primary)] hover:underline"
             >
               Enviar otro mensaje
             </button>
           </div>
         ) : (
-          <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none">
-            <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-              {(status?.error || fieldError) && (
-                <p className="text-red-500 text-xs font-medium ml-1 bg-red-500/10 p-3 rounded-lg border border-red-500/20">
-                  {fieldError || status?.error}
-                </p>
+          <div className="bg-[var(--surface)] p-8 rounded-[var(--radius-xl)] border border-[var(--border)] shadow-[var(--shadow-lg)]">
+            <form onSubmit={onSubmit(handleFormSubmit)} className="flex flex-col gap-5">
+              {status?.error && (
+                <div className="p-3 text-sm text-[var(--danger)] bg-[var(--danger-muted)] rounded-[var(--radius-md)] border border-[var(--danger)]/20">
+                  {status.error}
+                </div>
               )}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold uppercase tracking-wider text-slate-500 ml-1">Nombre</label>
-                  <input 
-                    name="name" 
-                    type="text" 
-                    placeholder="Ej. Juan Pérez" 
-                    className="rounded-xl border-slate-200 dark:border-slate-700 dark:bg-slate-800 focus:ring-2 focus:ring-[#068ce5]/20 focus:border-[#068ce5] outline-none px-4 py-3 text-sm transition-all"
-                    value={formData.name}
-                    onChange={(e) => {
-                      setFormData({ ...formData, name: e.target.value });
-                      setFieldError(null);
-                    }}
-                  />
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold uppercase tracking-wider text-slate-500 ml-1">Email</label>
-                  <input 
-                    name="email" 
-                    type="email" 
-                    placeholder="tu@email.com" 
-                    className="rounded-xl border-slate-200 dark:border-slate-700 dark:bg-slate-800 focus:ring-2 focus:ring-[#068ce5]/20 focus:border-[#068ce5] outline-none px-4 py-3 text-sm transition-all"
-                    value={formData.email}
-                    onChange={(e) => {
-                      setFormData({ ...formData, email: e.target.value });
-                      setFieldError(null);
-                    }}
-                  />
-                </div>
-              </div>
-              
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-500 ml-1">Asunto</label>
-                <input 
-                  name="subject" 
-                  type="text" 
-                  placeholder="¿Cómo podemos ayudarte?" 
-                  className="rounded-xl border-slate-200 dark:border-slate-700 dark:bg-slate-800 focus:ring-2 focus:ring-[#068ce5]/20 focus:border-[#068ce5] outline-none px-4 py-3 text-sm transition-all"
-                  value={formData.subject}
-                  onChange={(e) => {
-                    setFormData({ ...formData, subject: e.target.value });
-                    setFieldError(null);
-                  }}
+                <Input
+                  label="Nombre"
+                  name="name"
+                  type="text"
+                  placeholder="Ej. Juan Pérez"
+                  value={values.name || ""}
+                  onChange={(e) => handleChange("name", e.target.value)}
+                  error={errors.name}
+                />
+                <Input
+                  label="Email"
+                  name="email"
+                  type="email"
+                  placeholder="tu@email.com"
+                  value={values.email || ""}
+                  onChange={(e) => handleChange("email", e.target.value)}
+                  error={errors.email}
                 />
               </div>
 
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-500 ml-1">Mensaje</label>
-                <textarea 
-                  name="message" 
-                  rows={4} 
-                  placeholder="Escribe tu mensaje aquí..." 
-                  className="rounded-xl border-slate-200 dark:border-slate-700 dark:bg-slate-800 focus:ring-2 focus:ring-[#068ce5]/20 focus:border-[#068ce5] outline-none px-4 py-3 text-sm transition-all resize-none"
-                  value={formData.message}
-                  onChange={(e) => {
-                    setFormData({ ...formData, message: e.target.value });
-                    setFieldError(null);
-                  }}
-                />
-              </div>
+              <Input
+                label="Asunto"
+                name="subject"
+                type="text"
+                placeholder="¿Cómo podemos ayudarte?"
+                value={values.subject || ""}
+                onChange={(e) => handleChange("subject", e.target.value)}
+                error={errors.subject}
+              />
 
-              <button 
-                disabled={isPending}
-                className="bg-[#068ce5] text-white font-bold py-4 rounded-2xl hover:bg-[#068ce5]/90 transition-all shadow-lg shadow-[#068ce5]/25 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-2"
+              <Textarea
+                label="Mensaje"
+                name="message"
+                rows={4}
+                placeholder="Escribe tu mensaje aquí..."
+                value={values.message || ""}
+                onChange={(e) => handleChange("message", e.target.value)}
+                error={errors.message}
+              />
+
+              <Button
+                type="submit"
+                isLoading={isSubmitting}
+                loadingText="Enviando mensaje..."
+                className="w-full mt-2"
+                size="lg"
               >
-                {isPending ? (
-                  <div className="size-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                ) : 'Enviar mensaje'}
-              </button>
+                Enviar mensaje
+              </Button>
             </form>
           </div>
         )}

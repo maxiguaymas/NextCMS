@@ -1,28 +1,144 @@
 @import "tailwindcss";
 
-/* Habilita el modo oscuro basado en la clase .dark para Tailwind v4 */
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* ==========================================================================
+   DESIGN TOKENS - NextCMS
+   ========================================================================== 
+   
+   Sistema de tokens de diseño unificado para mantener consistencia.
+   
+   COLORES:
+   - Usar css variables para colores del tema
+   - Escala neutral para backgrounds/surfaces
+   - Colores semánticos para estados (success, danger, warning)
+   
+   ESPACIADO:
+   - xs: 4px (elementos compactos)
+   - sm: 8px (entre elementos relacionados)
+   - md: 16px (padding interno de componentes)
+   - lg: 24px (separación entre secciones)
+   - xl: 32px (separación mayor)
+   - 2xl: 48px (separación de secciones grandes)
+   
+   BORDES:
+   - radius-sm: 0.375rem (inputs, badges)
+   - radius-md: 0.5rem (botones, small cards)
+   - radius-lg: 0.75rem (cards, modals)
+   - radius-xl: 1rem (containers grandes)
+   
+   ========================================================================== */
+
 :root {
+  /* Background */
   --background: #ffffff;
+  --background-subtle: #f8fafc;
+  
+  /* Foreground (texto) */
   --foreground: #171717;
+  --foreground-muted: #5f7a8c;
+  
+  /* Surface (cards, panels) */
+  --surface: #ffffff;
+  --surface-elevated: #f8fafc;
+  
+  /* Border */
+  --border: #e2e8f0;
+  --border-subtle: #f1f5f9;
+  
+  /* Primary (color principal de marca) */
+  --primary: #068ce5;
+  --primary-hover: #0579c9;
+  --primary-foreground: #ffffff;
+  --primary-muted: rgba(6, 140, 229, 0.1);
+  
+  /* Semantic Colors */
+  --success: #10b981;
+  --success-muted: rgba(16, 185, 129, 0.1);
+  --danger: #dc2626;
+  --danger-muted: rgba(220, 38, 38, 0.1);
+  --warning: #f59e0b;
+  --warning-muted: rgba(245, 158, 11, 0.1);
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  
+  /* Border Radius */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+}
+
+.dark {
+  --background: #0f1b23;
+  --background-subtle: #0f1b23;
+  
+  --foreground: #ededed;
+  --foreground-muted: #8f9ba8;
+  
+  --surface: #0f172a;
+  --surface-elevated: #1e293b;
+  
+  --border: #282d33;
+  --border-subtle: #1f2328;
+  
+  --primary: #068ce5;
+  --primary-hover: #4da3e8;
+  --primary-foreground: #ffffff;
+  --primary-muted: rgba(6, 140, 229, 0.15);
+  
+  --success: #34d399;
+  --success-muted: rgba(52, 211, 153, 0.15);
+  --danger: #ef4444;
+  --danger-muted: rgba(239, 68, 68, 0.15);
+  --warning: #fbbf24;
+  --warning-muted: rgba(251, 191, 36, 0.15);
 }
 
 @theme inline {
+  /* Mapear CSS vars a Tailwind para uso con clases arbitrarias */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-/* Aplicar colores oscuros cuando la clase .dark esté presente en el html */
-.dark {
-  --background: #0a0a0a;
-  --foreground: #ededed;
+  --color-surface: var(--surface);
+  --color-border: var(--border);
+  --color-primary: var(--primary);
+  --color-success: var(--success);
+  --color-danger: var(--danger);
+  --color-warning: var(--warning);
+  
+  /* Typography */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, monospace;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-sans);
+}
+
+/* ==========================================================================
+   UTILITY CLASSES - Helpers usando design tokens
+   ========================================================================== */
+
+/* Spinner animation */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Fade in animation */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
 }
