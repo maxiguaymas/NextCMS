@@ -14,14 +14,22 @@ export default function LoginPage() {
   const isReset = searchParams.get("reset") === "true";
   
   const [formData, setFormData] = useState({ email: "", password: "" });
+  const [fieldError, setFieldError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    setFieldError(null);
     setError(null);
+
+    if (!formData.email.trim() || !formData.password.trim()) {
+      setFieldError("Por favor, completa todos los campos.");
+      return;
+    }
+
+    setLoading(true);
 
     const result = await signIn("credentials", {
       redirect: false,
@@ -75,21 +83,23 @@ export default function LoginPage() {
       )}
 
       <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
-        {error && (
+        {(error || fieldError) && (
           <div className="p-3 text-sm text-red-500 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-            {error}
+            {fieldError || error}
           </div>
         )}
 
         <div className="flex flex-col w-full">
           <label className="text-[#101518] dark:text-slate-200 text-sm font-medium pb-2">Correo electrónico</label>
           <input 
-            required
             className="flex w-full rounded-lg text-[#101518] dark:text-white focus:outline-0 focus:ring-2 focus:ring-[#028ce8]/50 border border-[#dae2e7] dark:border-slate-700 bg-white dark:bg-slate-800 h-12 px-4 text-base transition-all"
             placeholder="nombre@empresa.com" 
             type="email" 
             value={formData.email}
-            onChange={(e) => setFormData({...formData, email: e.target.value})}
+            onChange={(e) => {
+              setFormData({...formData, email: e.target.value});
+              setFieldError(null);
+            }}
           />
         </div>
 
@@ -102,12 +112,14 @@ export default function LoginPage() {
           </div>
           <div className="relative group">
             <input 
-              required
               className="flex w-full rounded-lg text-[#101518] dark:text-white focus:outline-0 focus:ring-2 focus:ring-[#028ce8]/50 border border-[#dae2e7] dark:border-slate-700 bg-white dark:bg-slate-800 h-12 pl-4 pr-12 text-base transition-all"
               placeholder="••••••••" 
               type={showPassword ? "text" : "password"} 
               value={formData.password}
-              onChange={(e) => setFormData({...formData, password: e.target.value})}
+              onChange={(e) => {
+                setFormData({...formData, password: e.target.value});
+                setFieldError(null);
+              }}
             />
             <button
               type="button"

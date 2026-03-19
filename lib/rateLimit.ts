@@ -55,7 +55,7 @@ export async function checkRateLimit(identifier: string, type: 'email' | 'contac
   }
   
   if (!limit.success) {
-    throw new Error(`Rate limit exceeded. Try again in ${Math.ceil((limit.reset - Date.now()) / 1000 / 60)} minutes.`);
+    throw new Error('Demasiadas solicitudes. Por favor, espera un momento antes de intentarlo de nuevo.');
   }
   
   return limit;

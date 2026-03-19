@@ -6,15 +6,39 @@ import { sendContactForm } from "./actions";
 export default function ContactPage() {
   const [isPending, setIsPending] = useState(false);
   const [status, setStatus] = useState<{ success?: boolean; error?: string } | null>(null);
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    subject: "",
+    message: "",
+  });
+  const [fieldError, setFieldError] = useState<string | null>(null);
 
-  async function handleSubmit(formData: FormData) {
-    setIsPending(true);
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setFieldError(null);
     setStatus(null);
+
+    if (!formData.name.trim() || !formData.email.trim() || !formData.subject.trim() || !formData.message.trim()) {
+      setFieldError("Por favor, completa todos los campos.");
+      return;
+    }
+
+    setIsPending(true);
+    
+    const formDataToSend = new FormData();
+    formDataToSend.append("name", formData.name);
+    formDataToSend.append("email", formData.email);
+    formDataToSend.append("subject", formData.subject);
+    formDataToSend.append("message", formData.message);
     
     try {
-      const result = await sendContactForm(formData);
+      const result = await sendContactForm(formDataToSend);
       setStatus(result);
-    } catch (e) {
+      if (result.success) {
+        setFormData({ name: "", email: "", subject: "", message: "" });
+      }
+    } catch {
       setStatus({ error: "Ocurrió un error inesperado. Inténtalo de nuevo." });
     } finally {
       setIsPending(false);
@@ -41,7 +65,10 @@ export default function ContactPage() {
             <h3 className="text-emerald-600 dark:text-emerald-400 font-bold text-xl mb-2">¡Mensaje enviado!</h3>
             <p className="text-slate-600 dark:text-slate-400 text-sm">Gracias por contactarnos. Hemos recibido tu solicitud correctamente.</p>
             <button 
-              onClick={() => setStatus(null)}
+              onClick={() => {
+                setStatus(null);
+                setFormData({ name: "", email: "", subject: "", message: "" });
+              }}
               className="mt-6 text-sm font-bold text-[#068ce5] hover:underline"
             >
               Enviar otro mensaje
@@ -49,36 +76,73 @@ export default function ContactPage() {
           </div>
         ) : (
           <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none">
-            <form action={handleSubmit} className="flex flex-col gap-5">
-              {/* Honeypot Field (Invisible para humanos) */}
-              <input type="text" name="honeypot" className="hidden" tabIndex={-1} autoComplete="off" />
+            <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+              {(status?.error || fieldError) && (
+                <p className="text-red-500 text-xs font-medium ml-1 bg-red-500/10 p-3 rounded-lg border border-red-500/20">
+                  {fieldError || status?.error}
+                </p>
+              )}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div className="flex flex-col gap-1.5">
                   <label className="text-xs font-bold uppercase tracking-wider text-slate-500 ml-1">Nombre</label>
-                  <input required name="name" type="text" placeholder="Ej. Juan Pérez" className="rounded-xl border-slate-200 dark:border-slate-700 dark:bg-slate-800 focus:ring-2 focus:ring-[#068ce5]/20 focus:border-[#068ce5] outline-none px-4 py-3 text-sm transition-all" />
+                  <input 
+                    name="name" 
+                    type="text" 
+                    placeholder="Ej. Juan Pérez" 
+                    className="rounded-xl border-slate-200 dark:border-slate-700 dark:bg-slate-800 focus:ring-2 focus:ring-[#068ce5]/20 focus:border-[#068ce5] outline-none px-4 py-3 text-sm transition-all"
+                    value={formData.name}
+                    onChange={(e) => {
+                      setFormData({ ...formData, name: e.target.value });
+                      setFieldError(null);
+                    }}
+                  />
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <label className="text-xs font-bold uppercase tracking-wider text-slate-500 ml-1">Email</label>
-                  <input required name="email" type="email" placeholder="tu@email.com" className="rounded-xl border-slate-200 dark:border-slate-700 dark:bg-slate-800 focus:ring-2 focus:ring-[#068ce5]/20 focus:border-[#068ce5] outline-none px-4 py-3 text-sm transition-all" />
+                  <input 
+                    name="email" 
+                    type="email" 
+                    placeholder="tu@email.com" 
+                    className="rounded-xl border-slate-200 dark:border-slate-700 dark:bg-slate-800 focus:ring-2 focus:ring-[#068ce5]/20 focus:border-[#068ce5] outline-none px-4 py-3 text-sm transition-all"
+                    value={formData.email}
+                    onChange={(e) => {
+                      setFormData({ ...formData, email: e.target.value });
+                      setFieldError(null);
+                    }}
+                  />
                 </div>
               </div>
               
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs font-bold uppercase tracking-wider text-slate-500 ml-1">Asunto</label>
-                <input required name="subject" type="text" placeholder="¿Cómo podemos ayudarte?" className="rounded-xl border-slate-200 dark:border-slate-700 dark:bg-slate-800 focus:ring-2 focus:ring-[#068ce5]/20 focus:border-[#068ce5] outline-none px-4 py-3 text-sm transition-all" />
+                <input 
+                  name="subject" 
+                  type="text" 
+                  placeholder="¿Cómo podemos ayudarte?" 
+                  className="rounded-xl border-slate-200 dark:border-slate-700 dark:bg-slate-800 focus:ring-2 focus:ring-[#068ce5]/20 focus:border-[#068ce5] outline-none px-4 py-3 text-sm transition-all"
+                  value={formData.subject}
+                  onChange={(e) => {
+                    setFormData({ ...formData, subject: e.target.value });
+                    setFieldError(null);
+                  }}
+                />
               </div>
 
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs font-bold uppercase tracking-wider text-slate-500 ml-1">Mensaje</label>
-                <textarea required name="message" rows={4} placeholder="Escribe tu mensaje aquí..." className="rounded-xl border-slate-200 dark:border-slate-700 dark:bg-slate-800 focus:ring-2 focus:ring-[#068ce5]/20 focus:border-[#068ce5] outline-none px-4 py-3 text-sm transition-all resize-none"></textarea>
+                <textarea 
+                  name="message" 
+                  rows={4} 
+                  placeholder="Escribe tu mensaje aquí..." 
+                  className="rounded-xl border-slate-200 dark:border-slate-700 dark:bg-slate-800 focus:ring-2 focus:ring-[#068ce5]/20 focus:border-[#068ce5] outline-none px-4 py-3 text-sm transition-all resize-none"
+                  value={formData.message}
+                  onChange={(e) => {
+                    setFormData({ ...formData, message: e.target.value });
+                    setFieldError(null);
+                  }}
+                />
               </div>
-
-              {status?.error && (
-                <p className="text-red-500 text-xs font-medium ml-1 bg-red-500/10 p-3 rounded-lg border border-red-500/20">
-                  {status.error}
-                </p>
-              )}
 
               <button 
                 disabled={isPending}

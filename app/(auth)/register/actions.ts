@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { sendVerificationEmail } from "@/lib/mail";
 import { checkRateLimit } from "@/lib/rateLimit";
+import { getClientIP } from "@/lib/ip";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 
@@ -32,8 +33,8 @@ export async function registerUser(formData: FormData) {
   const { name, email, password } = result.data;
 
   try {
-    // Rate limiting
-    const ip = '127.0.0.1'; // En producción, obtener de headers
+    // Rate limiting con IP real del cliente
+    const ip = await getClientIP();
     await checkRateLimit(ip, 'email');
 
     // 1. Verificar si el usuario ya existe
@@ -65,7 +66,7 @@ export async function registerUser(formData: FormData) {
   } catch (error) {
     console.error("Registration error:", error);
     
-    if (error instanceof Error && error.message.includes('Rate limit')) {
+    if (error instanceof Error && error.message.includes('Demasiadas solicitudes')) {
       return { error: error.message };
     }
     

@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { sendPasswordResetEmail } from "@/lib/mail";
 import { checkRateLimit } from "@/lib/rateLimit";
+import { getClientIP } from "@/lib/ip";
 import { randomUUID } from "crypto";
 import { z } from "zod";
 
@@ -20,8 +21,8 @@ export async function requestPasswordReset(formData: FormData) {
   const email = result.data;
 
   try {
-    // Rate limiting
-    const ip = '127.0.0.1'; // En producción, obtener de headers
+    // Rate limiting con IP real del cliente
+    const ip = await getClientIP();
     await checkRateLimit(ip, 'email');
 
     const user = await prisma.user.findUnique({ where: { email } });
@@ -51,7 +52,7 @@ export async function requestPasswordReset(formData: FormData) {
   } catch (error) {
     console.error("Reset request error:", error);
     
-    if (error instanceof Error && error.message.includes('Rate limit')) {
+    if (error instanceof Error && error.message.includes('Demasiadas solicitudes')) {
       return { error: error.message };
     }
     

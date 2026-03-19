@@ -6,10 +6,22 @@ import { subscribeToNewsletter } from "@/app/(public)/newsletter-actions";
 export default function NewsletterForm() {
   const [status, setStatus] = useState<{ success?: boolean; error?: string } | null>(null);
   const [isPending, setIsPending] = useState(false);
+  const [email, setEmail] = useState("");
 
-  async function handleSubmit(formData: FormData) {
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    
+    if (!email.trim()) {
+      setStatus({ error: "Por favor, ingresa tu correo electrónico." });
+      return;
+    }
+    
     setIsPending(true);
     setStatus(null);
+    
+    const formData = new FormData();
+    formData.append("email", email);
+    
     const result = await subscribeToNewsletter(formData);
     setStatus(result);
     setIsPending(false);
@@ -27,14 +39,15 @@ export default function NewsletterForm() {
 
   return (
     <div className="w-full">
-      <form action={handleSubmit} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+      <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
         <div className="flex-1 flex flex-col gap-2">
           <input 
-            required
             name="email"
             className="w-full rounded-xl border-slate-200 dark:border-slate-700 dark:bg-slate-800 focus:ring-[#068ce5] focus:border-[#068ce5] px-4 py-3 text-sm outline-none transition-all" 
             placeholder="tu@empresa.com" 
             type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
           />
           {status?.error && (
             <p className="text-red-500 text-[10px] font-bold text-left ml-1 uppercase tracking-wider">
@@ -45,6 +58,7 @@ export default function NewsletterForm() {
         <button 
           disabled={isPending}
           className="h-[46px] bg-[#068ce5] text-white font-bold px-6 rounded-xl hover:bg-[#068ce5]/90 transition-all shadow-md shadow-[#068ce5]/10 disabled:opacity-50"
+          type="submit"
         >
           {isPending ? '...' : 'Suscribirse'}
         </button>

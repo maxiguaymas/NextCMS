@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { sendContactNotification } from "@/lib/mail";
 import { checkRateLimit } from "@/lib/rateLimit";
+import { getClientIP } from "@/lib/ip";
 import { z } from "zod";
 
 // Schema de validación para el formulario de contacto
@@ -41,8 +42,8 @@ export async function sendContactForm(formData: FormData) {
   const { name, email, subject, message } = result.data;
 
   try {
-    // 4. Aplicar rate limiting basado en IP (simulado)
-    const ip = '127.0.0.1'; // En producción, obtener de headers
+    // 4. Rate limiting con IP real del cliente
+    const ip = await getClientIP();
     await checkRateLimit(ip, 'contact');
 
     // 5. Guardar en la base de datos
@@ -62,7 +63,7 @@ export async function sendContactForm(formData: FormData) {
   } catch (error) {
     console.error("Contact form error:", error);
     
-    if (error instanceof Error && error.message.includes('Rate limit')) {
+    if (error instanceof Error && error.message.includes('Demasiadas solicitudes')) {
       return { success: false, error: error.message };
     }
     
