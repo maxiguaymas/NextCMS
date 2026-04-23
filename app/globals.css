@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
@@ -112,6 +113,19 @@
   /* Typography */
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-mono: ui-monospace, monospace;
+}
+
+/* ==========================================================================
+   LIST MARKERS - Estilos para las viñetas de listas
+   ========================================================================== */
+ul > li::marker,
+ol > li::marker {
+  color: #0f172a;
+}
+
+.dark ul > li::marker,
+.dark ol > li::marker {
+  color: #ffffff;
 }
 
 body {

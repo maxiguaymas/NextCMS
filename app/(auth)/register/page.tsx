@@ -6,6 +6,8 @@ import { registerUser } from "./actions";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import InputPassword from "@/components/ui/InputPassword";
+import PasswordStrengthMeter from "@/components/ui/PasswordStrengthMeter";
+import PasswordMatchIndicator from "@/components/ui/PasswordMatchIndicator";
 import { useForm } from "@/hooks/useForm";
 import { registerSchema, RegisterFormData } from "@/lib/schemas";
 
@@ -26,7 +28,8 @@ export default function RegisterPage() {
     const result = await registerUser(formData);
 
     if (result.success) {
-      router.push("/login?registered=true");
+      // Usar window.location para evitar race condition
+      window.location.href = "/login?registered=true";
     } else {
       setFieldError("email", result.error || "Error al registrar el usuario.");
     }
@@ -66,26 +69,36 @@ export default function RegisterPage() {
           autoComplete="email"
         />
 
-        <InputPassword
-          label="Contraseña"
-          name="password"
-          placeholder="••••••••"
-          value={values.password || ""}
-          onChange={(e) => handleChange("password", e.target.value)}
-          error={errors.password}
-          helperText="Mínimo 6 caracteres"
-          autoComplete="new-password"
-        />
+        <div className="flex flex-col gap-1.5">
+          <InputPassword
+            label="Contraseña"
+            name="password"
+            placeholder="••••••••"
+            value={values.password || ""}
+            onChange={(e) => handleChange("password", e.target.value)}
+            error={errors.password}
+            autoComplete="new-password"
+          />
+          {/* Barra de progreso de contraseña */}
+          <PasswordStrengthMeter password={values.password || ""} showLabels />
+        </div>
 
-        <InputPassword
-          label="Confirmar contraseña"
-          name="confirmPassword"
-          placeholder="••••••••"
-          value={values.confirmPassword || ""}
-          onChange={(e) => handleChange("confirmPassword", e.target.value)}
-          error={errors.confirmPassword}
-          autoComplete="new-password"
-        />
+        <div className="flex flex-col gap-1.5">
+          <InputPassword
+            label="Confirmar contraseña"
+            name="confirmPassword"
+            placeholder="••••••••"
+            value={values.confirmPassword || ""}
+            onChange={(e) => handleChange("confirmPassword", e.target.value)}
+            error={errors.confirmPassword}
+            autoComplete="new-password"
+          />
+          {/* Indicador de coincidencia */}
+          <PasswordMatchIndicator
+            password={values.password || ""}
+            confirmPassword={values.confirmPassword || ""}
+          />
+        </div>
 
         <Button type="submit" isLoading={isSubmitting} loadingText="Creando cuenta..." className="w-full mt-2">
           Crear cuenta

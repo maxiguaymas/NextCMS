@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import SearchInput from "@/components/ui/SearchInput";
 
 export default async function PostsPage({
   searchParams,
@@ -50,23 +51,9 @@ export default async function PostsPage({
           </p>
         </div>
 
-        {/* Search and Filters */}
+{/* Search and Filters */}
         <div className="flex flex-col gap-4">
-          <form className="w-full">
-            <label className="flex flex-col min-w-40 h-14 w-full group">
-              <div className="flex w-full flex-1 items-stretch rounded-xl h-full shadow-sm">
-                <div className="text-[#5f7a8c] flex border-none bg-white dark:bg-white/5 items-center justify-center pl-4 rounded-l-xl border-r-0">
-                  <span className="material-symbols-outlined">search</span>
-                </div>
-                <input 
-                  name="q"
-                  defaultValue={query}
-                  className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-[#111518] dark:text-white focus:outline-0 focus:ring-2 focus:ring-[#068ce5]/50 border-none bg-white dark:bg-white/5 focus:border-none h-full placeholder:text-[#5f7a8c] px-4 rounded-l-none border-l-0 pl-2 text-base font-normal leading-normal transition-all" 
-                  placeholder="Buscar publicaciones técnicas..." 
-                />
-              </div>
-            </label>
-          </form>
+          <SearchInput placeholder="Buscar publicaciones técnicas..." minChars={2} debounceMs={300} />
           
           <div className="flex gap-3 flex-wrap items-center">
             <span className="text-[#5f7a8c] dark:text-gray-400 text-sm font-semibold mr-2 uppercase tracking-wider">Filtrar por:</span>

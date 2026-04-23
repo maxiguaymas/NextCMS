@@ -180,6 +180,16 @@ export default function PostForm({ initialData }: { initialData?: any }) {
                 className="w-full bg-slate-50 dark:bg-[#0f1115] border border-gray-100 dark:border-[#282d33] rounded-xl p-3 text-xs text-slate-600 dark:text-slate-300 focus:outline-none focus:ring-1 focus:ring-[#028ce8] transition-all"
               />
             </div>
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Meta Descripción</label>
+              <textarea
+                rows={3}
+                value={metaDescription}
+                onChange={(e) => setMetaDescription(e.target.value)}
+                placeholder="Descripción para Google..."
+                className="w-full bg-slate-50 dark:bg-[#0f1115] border border-gray-100 dark:border-[#282d33] rounded-xl p-3 text-xs text-slate-600 dark:text-slate-300 focus:outline-none focus:ring-1 focus:ring-[#028ce8] transition-all resize-none"
+              />
+            </div>
           </div>
         </div>
       </div>

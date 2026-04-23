@@ -1,10 +1,22 @@
+'use client';
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 export default function AuthLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
+  
+  // Si estamos en /register, mostrar "Iniciar sesión"
+  // Si estamos en /login, mostrar "Registrarse"
+  const isRegisterPage = pathname === "/register";
+  const buttonText = isRegisterPage ? "Iniciar sesión" : "Registrarse";
+  const buttonHref = isRegisterPage ? "/login" : "/register";
+  const questionText = isRegisterPage ? "¿Ya tienes una cuenta?" : "¿No tienes una cuenta?";
+
   return (
     <div className="bg-[#f5f7f8] dark:bg-[#0f1b23] font-sans min-h-screen flex flex-col transition-colors duration-300">
       {/* Top Navigation */}
@@ -18,9 +30,9 @@ export default function AuthLayout({
           <h2 className="text-lg font-bold leading-tight tracking-[-0.015em]">NextCMS</h2>
         </Link>
         <div className="flex items-center gap-4">
-          <span className="text-sm text-slate-500 dark:text-slate-400 hidden sm:block">¿No tienes una cuenta?</span>
-          <Link href="/register" className="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-[#028ce8]/10 text-[#028ce8] text-sm font-bold leading-normal hover:bg-[#028ce8]/20 transition-colors">
-            <span className="truncate">Registrarse</span>
+          <span className="text-sm text-slate-500 dark:text-slate-400 hidden sm:block">{questionText}</span>
+          <Link href={buttonHref} className="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-[#028ce8]/10 text-[#028ce8] text-sm font-bold leading-normal hover:bg-[#028ce8]/20 transition-colors">
+            <span className="truncate">{buttonText}</span>
           </Link>
         </div>
       </header>

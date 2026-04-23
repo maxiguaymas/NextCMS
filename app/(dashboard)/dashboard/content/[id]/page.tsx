@@ -99,7 +99,7 @@ export default async function PostDetailPage({ params }: { params: Promise<{ id:
                 </div>
               )}
 
-              <div className="prose dark:prose-invert max-w-none text-slate-600 dark:text-slate-300" dangerouslySetInnerHTML={{ __html: post.content }} />
+              <div className="prose dark:prose-invert max-w-none text-slate-600 dark:text-slate-300 [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:text-slate-900 [&_h2]:dark:text-white [&_h2]:mt-6 [&_h2]:mb-3 [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:space-y-1 [&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:space-y-1 [&_li]:text-slate-700 [&_li]:dark:text-slate-300 [&_blockquote]:border-l-4 [&_blockquote]:border-[#028ce8] [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-slate-600 [&_blockquote]:dark:text-slate-400" dangerouslySetInnerHTML={{ __html: post.content }} />
             </div>
           </div>
         </div>
