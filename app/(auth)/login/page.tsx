@@ -32,7 +32,8 @@ export default function LoginPage() {
     if (result?.error) {
       setFieldError("email", "Credenciales incorrectas o cuenta no verificada.");
     } else {
-      router.push("/dashboard");
+      // Usar window.location para evitar race condition con la cookie de sesión
+      window.location.href = "/dashboard";
     }
   };
 
